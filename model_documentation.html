@@ -195,21 +195,90 @@
                 
   <div class="section" id="cesm-test-case-documentation">
 <h1>CESM Test Case Documentation<a class="headerlink" href="#cesm-test-case-documentation" title="Permalink to this headline">¶</a></h1>
-<p>This is a set of test data from the Community Earth System Model (CESM)! Below is an example case using the <code class="docutils literal notranslate"><span class="pre">B1850</span></code> configuration, fully coupled!</p>
+<p>This is a set of test data from the Community Earth System Model (CESM)! Below is an example case using the <code class="docutils literal notranslate"><span class="pre">B1850</span></code> component set, fully coupled!</p>
 <div class="section" id="data-availability">
 <h2>Data Availability<a class="headerlink" href="#data-availability" title="Permalink to this headline">¶</a></h2>
-<p>An <a class="reference external" href="https://intake-esm.readthedocs.io/en/latest/">Intake-esm</a> catalog was generated for the model and is stored can be accessed using the following filepath `</p>
+<p>An <a class="reference external" href="https://intake-esm.readthedocs.io/en/latest/">Intake-esm</a> catalog was generated for the model and is stored can be accessed using the following filepath <code class="docutils literal notranslate"><span class="pre">/glade/work/mgrover/cesm-hist-test.json</span></code></p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">wand.image</span> <span class="kn">import</span> <span class="n">Image</span> <span class="k">as</span> <span class="n">WImage</span>
-<span class="n">img</span> <span class="o">=</span> <span class="n">WImage</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;cesm_test_catalog.pdf&#39;</span><span class="p">)</span>
-<span class="n">img</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">intake</span>
+<span class="kn">from</span> <span class="nn">graphviz</span> <span class="kn">import</span> <span class="n">Digraph</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">col</span> <span class="o">=</span> <span class="n">intake</span><span class="o">.</span><span class="n">open_esm_datastore</span><span class="p">(</span><span class="s1">&#39;/glade/work/mgrover/cesm-hist-test.json&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="_images/model_documentation_1_0.png" src="_images/model_documentation_1_0.png" />
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/glade/u/home/mgrover/.local/lib/python3.9/site-packages/fastprogress/fastprogress.py:102: UserWarning: Couldn&#39;t import ipywidgets properly, progress bar will use console behavior
+  warn(&quot;Couldn&#39;t import ipywidgets properly, progress bar will use console behavior&quot;)
+</pre></div>
 </div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">df</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create Digraph object - use the left to right orientation instead of vertical</span>
+<span class="n">dot</span> <span class="o">=</span> <span class="n">Digraph</span><span class="p">(</span><span class="n">graph_attr</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;rankdir&#39;</span><span class="p">:</span> <span class="s1">&#39;LR&#39;</span><span class="p">})</span>
+
+<span class="c1"># Save the catalog as a pdf</span>
+<span class="n">dot</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="s1">&#39;pdf&#39;</span>
+
+<span class="c1"># Start counting at one for node numbers</span>
+<span class="n">num_node</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="c1"># Loop through the different cases</span>
+<span class="k">for</span> <span class="n">case</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">case</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+    <span class="n">case_i</span> <span class="o">=</span> <span class="n">num_node</span>
+    <span class="n">dot</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">case_i</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="n">case</span><span class="p">)</span>
+    <span class="n">num_node</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Loop through the different components in each case</span>
+    <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">case</span> <span class="o">==</span> <span class="n">case</span><span class="p">]</span><span class="o">.</span><span class="n">component</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+        <span class="n">comp_i</span> <span class="o">=</span> <span class="n">num_node</span>
+        <span class="n">dot</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">comp_i</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="n">component</span><span class="p">)</span>
+        <span class="n">dot</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">case_i</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">comp_i</span><span class="p">))</span>
+        <span class="n">num_node</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Loop through the frequency in each component within each experiment</span>
+        <span class="k">for</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">case</span> <span class="o">==</span> <span class="n">case</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">component</span> <span class="o">==</span> <span class="n">component</span><span class="p">)</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">frequency</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+            <span class="n">freq_i</span> <span class="o">=</span> <span class="n">num_node</span>
+            
+            <span class="c1"># Pull out the the stream information</span>
+            <span class="n">stream</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">case</span> <span class="o">==</span> <span class="n">case</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">component</span> <span class="o">==</span> <span class="n">component</span><span class="p">)</span> <span class="o">&amp;</span>
+                            <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">frequency</span> <span class="o">==</span> <span class="n">frequency</span><span class="p">)]</span><span class="o">.</span><span class="n">stream</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            
+            <span class="c1"># Add both stream and frequency information to these bubbles</span>
+            <span class="n">dot</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">freq_i</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;stream: </span><span class="si">{</span><span class="n">stream</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1"> frequency: </span><span class="si">{</span><span class="n">frequency</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">dot</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">comp_i</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">freq_i</span><span class="p">))</span>
+            <span class="n">num_node</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">comp_i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">case_i</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dot</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/model_documentation_5_0.svg" src="_images/model_documentation_5_0.svg" /></div>
 </div>
 </div>
 </div>
