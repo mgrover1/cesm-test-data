@@ -1,0 +1,4 @@
+title: "CESM Test Data"
+logo: images/cesm.jpg
+execute:
+  execute_notebooks: "off"
